@@ -1,0 +1,31 @@
+services:
+  product-postgres:
+    image: postgres:16-alpine
+    container_name: product-postgres
+    environment:
+      POSTGRES_DB: product_db
+      POSTGRES_USER: product_service
+      POSTGRES_PASSWORD: product_service
+    ports:
+      - "5434:5432"
+    volumes:
+      - product_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U product_service -d product_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  product-redis:
+    image: redis:7-alpine
+    container_name: product-redis
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  product_postgres_data:
