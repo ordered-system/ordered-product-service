@@ -3,7 +3,6 @@ package pl.dybcio.ordered.catalog.controller;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +19,7 @@ import pl.dybcio.ordered.catalog.dto.CreateProductRequest;
 import pl.dybcio.ordered.catalog.dto.ProductResponse;
 import pl.dybcio.ordered.catalog.dto.UpdateProductRequest;
 import pl.dybcio.ordered.catalog.service.ProductService;
+import pl.dybcio.ordered.common.dto.PageResponse;
 import pl.dybcio.ordered.security.AuthenticatedUser;
 
 @RestController
@@ -48,8 +48,8 @@ public class ProductController {
   }
 
   @GetMapping
-  public Page<ProductResponse> getAllProducts(Pageable pageable) {
-    return productService.getAllProducts(pageable);
+  public PageResponse<ProductResponse> getAllProducts(Pageable pageable) {
+    return PageResponse.from(productService.getAllProducts(pageable));
   }
 
   @GetMapping("/{id}")
