@@ -53,3 +53,5 @@ server:
 app:
   jwt:
     secret: ${JWT_SECRET:change-me-in-prod-min-256-bits-long-please-replace}
+  engagement-service:
+    base-url: ${ENGAGEMENT_SERVICE_URL:http://localhost:9094}

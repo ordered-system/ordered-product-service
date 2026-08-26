@@ -2,6 +2,8 @@ package pl.dybcio.ordered.catalog.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -28,12 +30,14 @@ import pl.dybcio.ordered.catalog.service.ProductNotFoundException;
 import pl.dybcio.ordered.catalog.service.ProductOwnershipException;
 import pl.dybcio.ordered.catalog.service.ProductService;
 import pl.dybcio.ordered.common.exception.GlobalExceptionHandler;
+import pl.dybcio.ordered.engagement.client.EngagementServiceClient;
 import pl.dybcio.ordered.security.AuthenticatedUser;
 
 @ExtendWith(MockitoExtension.class)
 class ProductControllerTest {
 
   @Mock private ProductService productService;
+  @Mock private EngagementServiceClient engagementServiceClient;
   private MockMvc mockMvc;
 
   private final AuthenticatedUser seller =
@@ -41,7 +45,7 @@ class ProductControllerTest {
 
   @BeforeEach
   void setUp() {
-    ProductController controller = new ProductController(productService);
+    ProductController controller = new ProductController(productService, engagementServiceClient);
     mockMvc =
         MockMvcBuilders.standaloneSetup(controller)
             .setControllerAdvice(new GlobalExceptionHandler())
@@ -114,6 +118,27 @@ class ProductControllerTest {
     when(productService.getProduct(999L)).thenThrow(new ProductNotFoundException(999L));
 
     mockMvc.perform(get("/api/v1/products/999")).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void getProduct_recordsView_whenRequestHasAnAuthenticatedUser() throws Exception {
+    authenticateAsSeller();
+    when(productService.getProduct(1L))
+        .thenReturn(new ProductResponse(1L, "Keyboard", "Mechanical", BigDecimal.TEN, 5, 42L));
+
+    mockMvc.perform(get("/api/v1/products/1")).andExpect(status().isOk());
+
+    verify(engagementServiceClient).recordViewAsync(42L, 1L);
+  }
+
+  @Test
+  void getProduct_doesNotRecordView_whenRequestIsAnonymous() throws Exception {
+    when(productService.getProduct(1L))
+        .thenReturn(new ProductResponse(1L, "Keyboard", "Mechanical", BigDecimal.TEN, 5, 42L));
+
+    mockMvc.perform(get("/api/v1/products/1")).andExpect(status().isOk());
+
+    verifyNoInteractions(engagementServiceClient);
   }
 
   @Test

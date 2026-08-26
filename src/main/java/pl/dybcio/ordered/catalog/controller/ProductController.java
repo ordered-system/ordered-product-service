@@ -20,6 +20,7 @@ import pl.dybcio.ordered.catalog.dto.ProductResponse;
 import pl.dybcio.ordered.catalog.dto.UpdateProductRequest;
 import pl.dybcio.ordered.catalog.service.ProductService;
 import pl.dybcio.ordered.common.dto.PageResponse;
+import pl.dybcio.ordered.engagement.client.EngagementServiceClient;
 import pl.dybcio.ordered.security.AuthenticatedUser;
 
 @RestController
@@ -27,9 +28,12 @@ import pl.dybcio.ordered.security.AuthenticatedUser;
 public class ProductController {
 
   private final ProductService productService;
+  private final EngagementServiceClient engagementServiceClient;
 
-  public ProductController(ProductService productService) {
+  public ProductController(
+      ProductService productService, EngagementServiceClient engagementServiceClient) {
     this.productService = productService;
+    this.engagementServiceClient = engagementServiceClient;
   }
 
   @PreAuthorize("hasRole('SELLER')")
@@ -53,7 +57,11 @@ public class ProductController {
   }
 
   @GetMapping("/{id}")
-  public ProductResponse getProduct(@PathVariable Long id) {
+  public ProductResponse getProduct(
+      @PathVariable Long id, @AuthenticationPrincipal AuthenticatedUser user) {
+    if (user != null) {
+      engagementServiceClient.recordViewAsync(user.userId(), id);
+    }
     return productService.getProduct(id);
   }
 
