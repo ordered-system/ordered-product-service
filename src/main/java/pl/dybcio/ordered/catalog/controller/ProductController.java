@@ -19,9 +19,9 @@ import pl.dybcio.ordered.catalog.dto.CreateProductRequest;
 import pl.dybcio.ordered.catalog.dto.ProductResponse;
 import pl.dybcio.ordered.catalog.dto.UpdateProductRequest;
 import pl.dybcio.ordered.catalog.service.ProductService;
-import pl.dybcio.ordered.common.dto.PageResponse;
+import pl.dybcio.ordered.commons.dto.PageResponse;
+import pl.dybcio.ordered.commons.security.AuthenticatedUser;
 import pl.dybcio.ordered.engagement.client.EngagementServiceClient;
-import pl.dybcio.ordered.security.AuthenticatedUser;
 
 @RestController
 @RequestMapping("/api/v1/products")

@@ -30,8 +30,9 @@ import pl.dybcio.ordered.catalog.service.ProductNotFoundException;
 import pl.dybcio.ordered.catalog.service.ProductOwnershipException;
 import pl.dybcio.ordered.catalog.service.ProductService;
 import pl.dybcio.ordered.common.exception.GlobalExceptionHandler;
+import pl.dybcio.ordered.commons.exception.CommonExceptionHandler;
+import pl.dybcio.ordered.commons.security.AuthenticatedUser;
 import pl.dybcio.ordered.engagement.client.EngagementServiceClient;
-import pl.dybcio.ordered.security.AuthenticatedUser;
 
 @ExtendWith(MockitoExtension.class)
 class ProductControllerTest {
@@ -48,7 +49,7 @@ class ProductControllerTest {
     ProductController controller = new ProductController(productService, engagementServiceClient);
     mockMvc =
         MockMvcBuilders.standaloneSetup(controller)
-            .setControllerAdvice(new GlobalExceptionHandler())
+            .setControllerAdvice(new GlobalExceptionHandler(), new CommonExceptionHandler())
             .setCustomArgumentResolvers(
                 new AuthenticationPrincipalArgumentResolver(),
                 new PageableHandlerMethodArgumentResolver())

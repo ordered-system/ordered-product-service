@@ -19,8 +19,8 @@ import pl.dybcio.ordered.cart.dto.CartResponse;
 import pl.dybcio.ordered.cart.dto.UpdateCartItemRequest;
 import pl.dybcio.ordered.cart.entity.Cart;
 import pl.dybcio.ordered.cart.service.CartService;
+import pl.dybcio.ordered.commons.security.AuthenticatedUser;
 import pl.dybcio.ordered.pricing.service.PricingService;
-import pl.dybcio.ordered.security.AuthenticatedUser;
 
 @RestController
 @RequestMapping("/api/v1/cart")
