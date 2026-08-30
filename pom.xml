@@ -227,6 +227,9 @@
                     <excludes>
                         <exclude>**/*IntegrationTest.java</exclude>
                     </excludes>
+                    <systemPropertyVariables>
+                        <spring.cloud.config.enabled>false</spring.cloud.config.enabled>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
@@ -244,6 +247,9 @@
                     <includes>
                         <include>**/*IntegrationTest.java</include>
                     </includes>
+                    <systemPropertyVariables>
+                        <spring.cloud.config.enabled>false</spring.cloud.config.enabled>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
