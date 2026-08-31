@@ -1,5 +1,7 @@
 package pl.dybcio.ordered.cart.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
@@ -25,17 +27,20 @@ import pl.dybcio.ordered.pricing.service.PricingService;
 @RestController
 @RequestMapping("/api/v1/cart")
 @RequiredArgsConstructor
+@Tag(name = "Cart", description = "The authenticated user's own shopping cart")
 public class CartController {
 
   private final CartService cartService;
   private final PricingService pricingService;
 
   @GetMapping
+  @Operation(summary = "Get the authenticated user's cart")
   public CartResponse getCart(@AuthenticationPrincipal AuthenticatedUser user) {
     return toResponse(cartService.getOrCreateCart(user.userId()));
   }
 
   @PostMapping("/items")
+  @Operation(summary = "Add a product to the cart")
   public CartResponse addItem(
       @Valid @RequestBody AddToCartRequest request,
       @AuthenticationPrincipal AuthenticatedUser user) {
@@ -44,6 +49,7 @@ public class CartController {
   }
 
   @PatchMapping("/items/{productId}")
+  @Operation(summary = "Change the quantity of an item already in the cart")
   public CartResponse updateItem(
       @PathVariable Long productId,
       @Valid @RequestBody UpdateCartItemRequest request,
@@ -53,6 +59,7 @@ public class CartController {
   }
 
   @DeleteMapping("/items/{productId}")
+  @Operation(summary = "Remove a single item from the cart")
   public ResponseEntity<Void> removeItem(
       @PathVariable Long productId, @AuthenticationPrincipal AuthenticatedUser user) {
     cartService.removeItem(user.userId(), productId);
@@ -60,6 +67,7 @@ public class CartController {
   }
 
   @DeleteMapping
+  @Operation(summary = "Clear the entire cart")
   public ResponseEntity<Void> clear(@AuthenticationPrincipal AuthenticatedUser user) {
     cartService.clearCart(user.userId());
     return ResponseEntity.noContent().build();

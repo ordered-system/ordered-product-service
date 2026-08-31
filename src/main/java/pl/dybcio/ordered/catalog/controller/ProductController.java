@@ -1,5 +1,7 @@
 package pl.dybcio.ordered.catalog.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -25,6 +27,7 @@ import pl.dybcio.ordered.engagement.client.EngagementServiceClient;
 
 @RestController
 @RequestMapping("/api/v1/products")
+@Tag(name = "Products", description = "Product catalog - browsing is public, writes need SELLER")
 public class ProductController {
 
   private final ProductService productService;
@@ -38,6 +41,7 @@ public class ProductController {
 
   @PreAuthorize("hasRole('SELLER')")
   @PostMapping
+  @Operation(summary = "Create a product (SELLER only)")
   public ResponseEntity<ProductResponse> createProduct(
       @Valid @RequestBody CreateProductRequest request,
       @AuthenticationPrincipal AuthenticatedUser user) {
@@ -47,16 +51,24 @@ public class ProductController {
 
   @PreAuthorize("hasRole('SELLER')")
   @GetMapping("/mine")
+  @Operation(summary = "List the authenticated seller's own products")
   public List<ProductResponse> getMyProducts(@AuthenticationPrincipal AuthenticatedUser user) {
     return productService.getProductsBySeller(user.userId());
   }
 
   @GetMapping
+  @Operation(summary = "Browse all active products, paginated (public)")
   public PageResponse<ProductResponse> getAllProducts(Pageable pageable) {
     return PageResponse.from(productService.getAllProducts(pageable));
   }
 
   @GetMapping("/{id}")
+  @Operation(
+      summary = "Get a product by id (public)",
+      description =
+          "If the caller is authenticated, this also fires an async, best-effort call to"
+              + " engagement-service to record the view in browsing history - it never blocks or"
+              + " fails this request even if engagement-service is down.")
   public ProductResponse getProduct(
       @PathVariable Long id, @AuthenticationPrincipal AuthenticatedUser user) {
     if (user != null) {
@@ -67,6 +79,7 @@ public class ProductController {
 
   @PreAuthorize("hasRole('SELLER') or hasRole('ADMIN')")
   @PutMapping("/{id}")
+  @Operation(summary = "Update a product (owning SELLER or ADMIN only)")
   public ProductResponse updateProduct(
       @PathVariable Long id,
       @Valid @RequestBody UpdateProductRequest request,
@@ -76,6 +89,9 @@ public class ProductController {
 
   @PreAuthorize("hasRole('SELLER') or hasRole('ADMIN')")
   @DeleteMapping("/{id}")
+  @Operation(
+      summary = "Deactivate a product (owning SELLER or ADMIN only)",
+      description = "Soft delete - the product stops appearing in listings but isn't removed.")
   public ResponseEntity<Void> deactivateProduct(
       @PathVariable Long id, @AuthenticationPrincipal AuthenticatedUser user) {
     productService.deactivateProduct(id, user.userId(), user.isAdmin());
