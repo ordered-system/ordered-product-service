@@ -63,6 +63,7 @@ management:
 
 server:
   port: ${PORT:9092}
+  forward-headers-strategy: framework
 
 app:
   engagement-service:
